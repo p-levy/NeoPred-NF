@@ -55,7 +55,7 @@ include { MHC_PREDICT }     from './workflows/mhc_predict'
 //
 // WORKFLOW: Run main nf-core/neoprednf analysis pipeline
 //
-workflow NFCORE_NEOPREDNF {
+workflow NEOPREDNF {
 
     if ( params.DNA && params.RNA ) {
         NEOPRED_DNA ()
@@ -109,7 +109,7 @@ workflow NFCORE_NEOPREDNF {
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
 workflow {
-    NFCORE_NEOPREDNF ()
+    NEOPREDNF ()
 }
 
 /*

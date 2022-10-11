@@ -17,8 +17,6 @@ workflow test_gatk_recalibrator {
     sites = file('/media/AGROS/References/hg19/dbsnp_138.b37.vcf.gz', checkIfExists: true)
     sites_tbi = file('/media/AGROS/References/hg19/dbsnp_138.b37.vcf.gz.tbi', checkIfExists: true)
 
-    println "${input}"
-
     BASERECALIBRATOR(
         input,
         fasta,

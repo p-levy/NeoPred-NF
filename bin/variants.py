@@ -113,6 +113,7 @@ def filter_variants_rna(file, tumor_coverage, tumor_var_depth,
     reader = vcfpy.Reader.from_path(file)
     for record in reader:
         for info in record.INFO['CSQ']:
+            print(info)
             record_INFO = Record_INFO(*info.split('|'))
             funcensGene = record_INFO.Consequence
             has_func_ens = 'missense' in funcensGene or 'frame' in funcensGene
@@ -301,7 +302,7 @@ def filter_variants_dna(file, normal_coverage, tumor_coverage, tumor_var_depth,
                         token = called['TUMOR.strelka'][alt_index]
                         tumor_AD2 = int(token[0]) if type(token) is list else int(token)
                         tumor_DP = tumor_AD1 + tumor_AD2
-                        tumor_VAF = np.around((tumor_AD2 / float(tumor_DP)) * 100, 3)
+                        tumor_VAF = np.around((tumor_AD2 / float(tumor_DP)) * 100, 3) if tumor_DP > 0.0 else 0.0
                         tumor_normal_ratio = tumor_VAF / normal_VAF if normal_VAF != 0 else t2n_ratio
                         if normal_DP >= normal_coverage and tumor_DP >= tumor_coverage \
                                 and tumor_VAF >= tumor_var_freq and tumor_AD2 >= tumor_var_depth \

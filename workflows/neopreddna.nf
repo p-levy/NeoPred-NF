@@ -152,6 +152,9 @@ workflow NEOPRED_DNA {
     //
     // MODULE: Run FastQC
     //
+
+    input_sample.view()
+
     FASTQC (
         input_sample
     )

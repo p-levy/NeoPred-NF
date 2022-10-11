@@ -23,8 +23,6 @@ process BWA_MEM {
     def software   = getSoftwareName(task.process)
     def prefix     = options.suffix ? "${meta.id}${options.suffix}.${part}" : "${meta.id}."
     def read_group = meta.read_group ? "-R ${meta.read_group}" : ""
-    
-    println "Mapping ${meta.patient}"
 
     """
     INDEX=`find -L ./ -name "*.amb" | sed 's/.amb//'`
@@ -34,7 +32,7 @@ process BWA_MEM {
         $read_group \\
         \$INDEX \\
         $reads \\
-        | samtools $options.args2 --threads ${split_cpus} -o ${prefix}bam
+        | samtools $options.args2 --threads $task.cpus -o ${prefix}bam
     echo \$(bwa 2>&1) | sed 's/^.*Version: //; s/Contact:.*\$//' > ${software}.version.txt
     """
 }
