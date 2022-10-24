@@ -46,7 +46,7 @@ def main(hla, overlap_final, alleles_file, mode, cutoff):
     filtered_hla = [x for x in filtered_hla if x in allowed_alleles]
 
     with open('allowed_alleles.txt', 'w') as f:
-        f.write(','.join(filtered_hla))
+        f.write(' '.join(filtered_hla))
 
     if len(filtered_hla) == 0:
         sys.stderr.write("Error, list of HLAs is empty.\n")
@@ -69,8 +69,8 @@ def main(hla, overlap_final, alleles_file, mode, cutoff):
                         protein_name = '{}_{}_{}'.format(''.join(columns[header.index('Variant key')].split()),
                                                          columns[header.index('cDNA change')],
                                                          columns[header.index('AA change')])
-                        protein_seq_mu = columns[header.index('Mut Epitope')].strip()
-                        protein_seq_wt = columns[header.index('Wt Epitope')].strip()
+                        protein_seq_mu = columns[header.index('Mut Epitope 25mer')].strip()
+                        protein_seq_wt = columns[header.index('Wt Epitope 25mer')].strip()
                         # Should probably make sure that all the letters in the protein seq are alpha (isalpha())
                         if protein_seq_mu != '-' and '.' not in protein_seq_mu and protein_seq_mu not in added_proteins_mu:
                             fwrite_mu.write('>{}\n{}\n'.format(protein_name, protein_seq_mu))
