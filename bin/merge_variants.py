@@ -154,7 +154,7 @@ def main(dna_variants,
         epitopes_dict = defaultdict(list)
         for variant, _ in value:
             for e in variant.epitopes:
-                epitopes_dict[e.mutseq].append(e)
+                epitopes_dict[e.mutseq[0]].append(e)
 
         # Iterate epitopes in the variant and write info to output
         for _, epitopes in epitopes_dict.items():
@@ -185,7 +185,7 @@ def main(dna_variants,
                                                   ';'.join(rna_name_pass), num_rna_pass,
                                                   ';'.join(rna_name_fail), num_rna_fail,
                                                   effect, epitope.dnamut, epitope.aamut, epitope.flags,
-                                                  epitope.wtseq, epitope.mutseq, transcripts,
+                                                  epitope.wtseq[0], epitope.mutseq[0], transcripts,
                                                   dna_callers, rna_callers, ';'.join(gene_locus)])
             if num_dna_pass >= 1:
                 final_file.write(to_write + '\n')
