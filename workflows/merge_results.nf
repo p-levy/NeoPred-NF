@@ -37,6 +37,7 @@ rna_tumor_vaf      = Channel.value(params.rna_tumor_vaf)
 rna_callers        = Channel.value(params.rna_callers)
 cdna_dict          = Channel.fromPath(params.cdna_dict).collect()
 aa_dict            = Channel.fromPath(params.aa_dict).collect()
+utr_dict           = Channel.fromPath(params.utr_dict).collect()
 pyensembl_version  = Channel.value(params.pyensembl)
 
 //
@@ -119,7 +120,8 @@ workflow MERGE_RESULTS {
         rna_tumor_vaf,     
         rna_callers,
         cdna_dict,
-        aa_dict    
+        aa_dict,
+        utr_dict    
     )
 
     emit:

@@ -38,14 +38,14 @@ class Variant:
         return '{}:{} {}>{} {} {}'.format(self.chrom, self.start, self.ref, self.alt, self.type, self.status)
 
 
-def epitopes(record, info, ens_data, cDNA_seq_dict, AA_seq_dict):
+def epitopes(record, info, ens_data, cDNA_seq_dict, AA_seq_dict, three_prime_utr_dict):
     """
     This function computes the epitopes (mutated and wt peptides) of
     a VEP annotated variant (record from vcfpy) using the effects and
     their isoforms from Ensembl.
     The function only considers nonsynonymous and framshift effects.
     :param record: A vcfpy record containing the variant information from VEP
-    :param info: 
+    :param info:
     :param ens_data: Ensembl's database cache version used to annotate the VCF
     :return:
         A list of unique epitopes detected in the variant
@@ -55,7 +55,7 @@ def epitopes(record, info, ens_data, cDNA_seq_dict, AA_seq_dict):
     funcensGene = info.Consequence
     allowed_contigs = ens_data.contigs()
     epitopes = list()
-    if 'missense' in funcensGene or 'frame' in funcensGene:
+    if 'missense' in funcensGene or 'frame' in funcensGene or 'stop_lost' in funcensGene:
         gene = info.SYMBOL
         transcript = info.Feature
         # sequence = ens_data.transcript_by_id(info.Feature)
@@ -65,7 +65,7 @@ def epitopes(record, info, ens_data, cDNA_seq_dict, AA_seq_dict):
         if chrom == 'M':
             chrom = 'MT'
         if chrom in allowed_contigs:
-            # TODO this should return a list 
+            # TODO this should return a list
             ref = record.REF
             mut_pos = record.POS
             if 'frame' in funcensGene:
@@ -74,17 +74,18 @@ def epitopes(record, info, ens_data, cDNA_seq_dict, AA_seq_dict):
                 elif len(record.ALT[0].serialize()) < len(record.REF):
                     mut_pos += 1
                     ref = record.REF[1:]
-            pos, flags, wtmer, mutmer = create_epitope_varcode(chrom,
-                                                               mut_pos,
-                                                               ref,
-                                                               info.Allele,
-                                                               ens_data,
-                                                               mut_dna,
-                                                               mut_aa,
-                                                               transcript,
-                                                               funcensGene, 
-                                                               cDNA_seq_dict, 
-                                                               AA_seq_dict)
+            flags, wtmer, mutmer = create_epitope_varcode(chrom,
+                                                    mut_pos,
+                                                    ref,
+                                                    info.Allele,
+                                                    ens_data,
+                                                    mut_dna,
+                                                    mut_aa,
+                                                    transcript,
+                                                    funcensGene,
+                                                    cDNA_seq_dict,
+                                                    AA_seq_dict,
+                                                    three_prime_utr_dict)
             epitopes.append(Epitope(transcript, gene, funcensGene, mut_dna, mut_aa, flags, wtmer, mutmer))
         else:
             print("Unable to infer epitope for contig {}".format(chrom))
@@ -92,7 +93,7 @@ def epitopes(record, info, ens_data, cDNA_seq_dict, AA_seq_dict):
 
 
 def filter_variants_rna(file, tumor_coverage, tumor_var_depth,
-                        tumor_var_freq, num_callers, ensembl_version, cDNA_seq_dict, AA_seq_dict):
+                        tumor_var_freq, num_callers, ensembl_version, cDNA_seq_dict, AA_seq_dict, three_prime_utr_dict):
     """
     This function processes a list of annotated RNA variants from VEP (VCF).
     It then applies some filters to the variants and computes the epitopes of each of
@@ -113,10 +114,9 @@ def filter_variants_rna(file, tumor_coverage, tumor_var_depth,
     reader = vcfpy.Reader.from_path(file)
     for record in reader:
         for info in record.INFO['CSQ']:
-            print(info)
             record_INFO = Record_INFO(*info.split('|'))
             funcensGene = record_INFO.Consequence
-            has_func_ens = 'missense' in funcensGene or 'frame' in funcensGene
+            has_func_ens = 'missense' in funcensGene or 'frame' in funcensGene or 'stop_lost' in funcensGene
             avsnp150 = record_INFO.Existing_variation.split('&')[0] if 'rs' in record_INFO.Existing_variation else 'NA'
             gnomad_AF = record_INFO.gnomAD_AF if record_INFO.gnomAD_AF != '' else 'NA'
             cosm_count = record_INFO.Existing_variation.count('COSV')
@@ -149,12 +149,12 @@ def filter_variants_rna(file, tumor_coverage, tumor_var_depth,
                 except KeyError:
                     continue
 
-                variant_epitopes = epitopes(record, record_INFO, ens_data, cDNA_seq_dict, AA_seq_dict)
+                variant_epitopes = epitopes(record, record_INFO, ens_data, cDNA_seq_dict, AA_seq_dict, three_prime_utr_dict)
                 variant = Variant()
                 variant.chrom = record.CHROM
                 variant.start = record.POS
                 variant.ref = record.REF
-                variant.alt = record_INFO.Allele
+                variant.alt = record.ALT[0].serialize()
                 variant.callers = '|'.join(['{}:{}'.format(key, value) for key, value in filtered.items()])
                 variant.num_callers = len(filtered)
                 variant.status = pass_variants >= num_callers
@@ -171,7 +171,7 @@ def filter_variants_rna(file, tumor_coverage, tumor_var_depth,
 
 def filter_variants_dna(file, normal_coverage, tumor_coverage, tumor_var_depth,
                         tumor_var_freq, normal_var_freq, t2n_ratio, num_callers,
-                        num_callers_indel, ensembl_version, cDNA_seq_dict, AA_seq_dict):
+                        num_callers_indel, ensembl_version, cDNA_seq_dict, AA_seq_dict, three_prime_utr_dict):
     """
     This function processes a list of annotated DNA variants from VEP (VCF).
     It then applies some filters to the variants and computes the epitopes of each of
@@ -343,7 +343,7 @@ def filter_variants_dna(file, normal_coverage, tumor_coverage, tumor_var_depth,
                 except KeyError:
                     continue
 
-                variant_epitopes = epitopes(record, record_INFO, ens_data, cDNA_seq_dict, AA_seq_dict)
+                variant_epitopes = epitopes(record, record_INFO, ens_data, cDNA_seq_dict, AA_seq_dict, three_prime_utr_dict)
                 variant = Variant()
                 variant.chrom = record.CHROM
                 variant.start = record.POS

@@ -1,6 +1,5 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 
-import statistics
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from collections import defaultdict
 
@@ -18,6 +17,7 @@ def main(dna_variants,
          rna_counts,
          cDNA_DICT,
          AA_DICT,
+         UTR_DICT,
          tumor_coverage,
          tumor_var_depth,
          tumor_var_freq,
@@ -43,11 +43,18 @@ def main(dna_variants,
         for line in handle.readlines():
             tokens = line.split(":")
             AA_seq_dict[tokens[0]] = tokens[1].strip()
+
     cDNA_seq_dict = dict()
     with open(cDNA_DICT, "r") as handle:
         for line in handle.readlines():
             tokens = line.split(":")
             cDNA_seq_dict[tokens[0]] = tokens[1].strip()
+
+    three_prime_utr_dict = dict()
+    with open(UTR_DICT, "r") as handle:
+        for line in handle.readlines():
+            tokens = line.split(":")
+            three_prime_utr_dict[tokens[0]] = tokens[1].strip()
 
     variant_dict = defaultdict(list)
 
@@ -65,7 +72,8 @@ def main(dna_variants,
                                            num_callers_indel,
                                            ensembl_version,
                                            cDNA_seq_dict,
-                                           AA_seq_dict)
+                                           AA_seq_dict,
+                                           three_prime_utr_dict)
             for variant in variants:
                 variant_dict[variant.key].append((variant, name))
 
@@ -79,7 +87,8 @@ def main(dna_variants,
                                            num_callers_rna,
                                            ensembl_version,
                                            cDNA_seq_dict,
-                                           AA_seq_dict)
+                                           AA_seq_dict,
+                                           three_prime_utr_dict)
             for variant in variants:
                 variant_dict[variant.key].append((variant, name))
 
@@ -91,7 +100,7 @@ def main(dna_variants,
         print('Loading Gene counts..')
         for file, name in zip(rna_counts, rna_names):
             counts_table = pd.read_csv(file, sep='\t', skiprows=1)
-            counts = counts_table.iloc[:, 6].to_numpy()     
+            counts = counts_table.iloc[:, 6].to_numpy()
             lengths = counts_table['Length'].to_numpy()
             rpb = counts / lengths
             counts_table['RPKM'] = (rpb / sum(counts)) * 1e9
@@ -110,8 +119,8 @@ def main(dna_variants,
                    'DNA samples (failing)\tNumber of DNA samples (failing)\t' \
                    'RNA samples (passing)\tNumber of RNA samples (passing)\t' \
                    'RNA samples (failing)\tNumber of RNA samples (failing)\tEffects\t' \
-                   'cDNA change\tAA change\tEpitope creation flags\tWt Epitope\t' \
-                   'Mut Epitope\tTranscripts\tDNA Callers Sample(Name:NDP;NAD;NVAF;TDP;TAD;TVAF)\t' \
+                   'cDNA change\tAA change\tEpitope creation flags\tWt Epitope 25mer\t' \
+                   'Mut Epitope 25mer\tWt Epitope 41mer\tMut Epitope 41mer\tTranscripts\tDNA Callers Sample(Name:NDP;NAD;NVAF;TDP;TAD;TVAF)\t' \
                    'RNA Callers Sample(Name:TDP;TAD;TVAF)\tGeneCount info Sample(gene;exp;mean;percentile)\n'
 
     final_file = open('overlap_final.txt', 'w')
@@ -185,7 +194,7 @@ def main(dna_variants,
                                                   ';'.join(rna_name_pass), num_rna_pass,
                                                   ';'.join(rna_name_fail), num_rna_fail,
                                                   effect, epitope.dnamut, epitope.aamut, epitope.flags,
-                                                  epitope.wtseq[0], epitope.mutseq[0], transcripts,
+                                                  epitope.wtseq[0], epitope.mutseq[0], epitope.wtseq[1], epitope.mutseq[1], transcripts,
                                                   dna_callers, rna_callers, ';'.join(gene_locus)])
             if num_dna_pass >= 1:
                 final_file.write(to_write + '\n')
@@ -218,6 +227,8 @@ if __name__ == '__main__':
                         help='Path to a dictionary of transcript IDs to peptide sequences', required=True)
     parser.add_argument('--dictcDNA',
                         help='Path to a dictionary of transcript IDs to DNA sequences', required=True)
+    parser.add_argument('--dict3prime',
+                        help='Path to a dictionary of transcript IDs to three prime UTR sequences.', required=True)
     parser.add_argument('--filter-dna-tumor-cov', type=int, default=10, required=False, dest='tumor_coverage',
                         help='Filter for DNA variants tumor number of reads (coverage) (DP). Default=10')
     parser.add_argument('--filter-dna-tumor-depth', type=int, default=4, required=False, dest='tumor_var_depth',
@@ -259,6 +270,7 @@ if __name__ == '__main__':
          args.rna_counts,
          os.path.abspath(args.dictcDNA),
          os.path.abspath(args.dictAA),
+         os.path.abspath(args.dict3prime),
          args.tumor_coverage,
          args.tumor_var_depth,
          args.tumor_var_freq,

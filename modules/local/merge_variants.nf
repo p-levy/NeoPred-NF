@@ -29,7 +29,8 @@ process MERGE_VARIANTS {
     val rna_tumor_vaf     
     val rna_callers    
     path cdna_dict
-    path aa_dict   
+    path aa_dict
+    path utr_dict   
 
     output:
     tuple val(patient), path("*_final.txt"),                        emit: overlap_final
@@ -68,5 +69,6 @@ process MERGE_VARIANTS {
         --ensembl-version $params.pyensembl \\
         --dictAA $aa_dict \\
         --dictcDNA $cdna_dict
+        --dict3prime $utr_dict
     """
 }
