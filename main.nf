@@ -30,6 +30,7 @@ params.hla_reference_dna = WorkflowMain.getGenomeAttribute(params, 'hla_referenc
 params.hla_reference_rna = WorkflowMain.getGenomeAttribute(params, 'hla_reference_rna')
 params.aa_dict = WorkflowMain.getGenomeAttribute(params, 'AA_dict')
 params.cdna_dict = WorkflowMain.getGenomeAttribute(params, 'cDNA_dict')
+params.utr_dict = WorkflowMain.getGenomeAttribute(params, 'utr_dict')
 params.pyensembl = WorkflowMain.getGenomeAttribute(params, 'pyensembl')
 params.alleles = WorkflowMain.getGenomeAttribute(params, 'alleles')
 
