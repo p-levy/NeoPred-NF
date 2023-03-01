@@ -16,21 +16,21 @@ process MERGE_VARIANTS {
 
     input:
     tuple val(patient), val(tumor_dna), path(vcfs_dna), val(tumor_rna), path(vcfs_rna), path(counts)
-    val dna_tumor_cov     
-    val dna_tumor_depth   
-    val dna_tumor_vaf     
-    val dna_normal_cov    
-    val dna_normal_vaf    
+    val dna_tumor_cov
+    val dna_tumor_depth
+    val dna_tumor_vaf
+    val dna_normal_cov
+    val dna_normal_vaf
     val tumor_normal_ratio
-    val dna_snv_callers   
-    val dna_indel_callers 
-    val rna_tumor_cov     
-    val rna_tumor_depth   
-    val rna_tumor_vaf     
-    val rna_callers    
+    val dna_snv_callers
+    val dna_indel_callers
+    val rna_tumor_cov
+    val rna_tumor_depth
+    val rna_tumor_vaf
+    val rna_callers
     path cdna_dict
     path aa_dict
-    path utr_dict   
+    path utr_dict
 
     output:
     tuple val(patient), path("*_final.txt"),                        emit: overlap_final
@@ -68,7 +68,7 @@ process MERGE_VARIANTS {
         --filter-rna-callers $rna_callers \\
         --ensembl-version $params.pyensembl \\
         --dictAA $aa_dict \\
-        --dictcDNA $cdna_dict
+        --dictcDNA $cdna_dict \\
         --dict3prime $utr_dict
     """
 }
