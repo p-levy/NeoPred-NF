@@ -1,6 +1,6 @@
 {
-    "name": "nf-core/neoprednf",
-    "homePage": "https://github.com/nf-core/neoprednf",
+    "name": "Akazhiel/NeoPred-NF",
+    "homePage": "https://github.com/Akazhiel/NeoPred-NF",
     "repos": {
         "nf-core/modules": {
             "fastqc": {

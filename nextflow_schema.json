@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/neoprednf/master/nextflow_schema.json",
-    "title": "nf-core/neoprednf pipeline parameters",
+    "$id": "https://raw.githubusercontent.com/Akazhiel/NeoPred-NF/master/nextflow_schema.json",
+    "title": "Akazhiel/NeoPred-NF pipeline parameters",
     "description": "Pipeline that performs variant calling on DNA Tumor-Normal samples and RNA Tumor to predict putative neoantigens that bind to the hla of the patient.",
     "type": "object",
     "definitions": {

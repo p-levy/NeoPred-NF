@@ -54,7 +54,7 @@ include { MERGE_RESULTS }   from './workflows/merge_results'
 include { MHC_PREDICT }     from './workflows/mhc_predict'
 
 //
-// WORKFLOW: Run main nf-core/neoprednf analysis pipeline
+// WORKFLOW: Run main Akazhiel/NeoPred-NF analysis pipeline
 //
 workflow NEOPREDNF {
 

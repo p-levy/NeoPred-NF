@@ -1,4 +1,4 @@
-# nf-core/neoprednf: Citations
+# Akazhiel/NeoPred-NF: Citations
 
 ## [nf-core](https://pubmed.ncbi.nlm.nih.gov/32055031/)
 

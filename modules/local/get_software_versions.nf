@@ -20,7 +20,7 @@ process GET_SOFTWARE_VERSIONS {
     path "software_versions.tsv"     , emit: tsv
     path 'software_versions_mqc.yaml', emit: yaml
 
-    script: // This script is bundled with the pipeline, in nf-core/neoprednf/bin/
+    script: // This script is bundled with the pipeline, in Akazhiel/NeoPred-NF/bin/
     """
     echo $workflow.manifest.version > pipeline.version.txt
     echo $workflow.nextflow.version > nextflow.version.txt

@@ -1,5 +1,5 @@
 //
-// This file holds several functions specific to the main.nf workflow in the nf-core/neoprednf pipeline
+// This file holds several functions specific to the main.nf workflow in the Akazhiel/NeoPred-NF pipeline
 //
 
 class WorkflowMain {
