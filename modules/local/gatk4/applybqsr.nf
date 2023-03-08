@@ -27,9 +27,10 @@ process GATK4_APPLYBQSR {
     
     if (meta.type == "dna") {
     """
-    gatk ApplyBQSR \\
+    gatk --java-options "-Dsamjdk.compression_level=9" ApplyBQSR \\
         -R $fasta \\
         -I $bam \\
+        --add-output-sam-program-record \\
         --bqsr-recal-file $bqsr_table \\
         --tmp-dir . \\
         -O ${prefix}.bam \\
