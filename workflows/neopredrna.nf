@@ -65,7 +65,7 @@ include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' 
 ========================================================================================
 */
 
-include { TRIMGALORE }              from '../modules/local/trimgalore'                      addParams( options: modules['trimgalore'] )
+include { FASTP }              from '../modules/local/fastp'                                addParams( options: modules['fastp'] )
 
 include { STAR_ALIGN }              from '../modules/local/star_align'                      addParams( options: modules['star_align'] )
 
@@ -120,13 +120,13 @@ workflow NEOPRED_RNA {
 
     // TRIM READS WITH CUTADAPT
 
-    TRIMGALORE (
+    FASTP (
         input_sample
     )
 
-    trimmed_reads = TRIMGALORE.out.reads
+    trimmed_reads = FASTP.out.reads
 
-    ch_software_versions = ch_software_versions.mix(TRIMGALORE.out.version.first().ifEmpty(null))
+    ch_software_versions = ch_software_versions.mix(FASTP.out.version.first().ifEmpty(null))
 
     // ALIGN READS WITH STAR
 
@@ -332,7 +332,7 @@ workflow NEOPRED_RNA {
     // ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
     // ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     // ch_multiqc_files = ch_multiqc_files.mix(GET_SOFTWARE_VERSIONS.out.yaml.collect())
-    // ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    // ch_multiqc_files = ch_multiqc_files.mix(FASTP.out.zip.collect{it[1]}.ifEmpty([]))
 
     // MULTIQC (
     //     ch_multiqc_files.collect()
