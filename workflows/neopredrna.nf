@@ -46,7 +46,6 @@ known_indels_index      = Channel.fromPath(params.known_indels_index).collect()
 dbsnp                   = Channel.fromPath(params.dbsnp).collect()
 target_bed              = params.target_bed        ? Channel.fromPath(params.target_bed).collect()        : ch_dummy_file
 dbsnp_tbi               = Channel.fromPath(params.dbsnp_index).collect()
-hla_rna_fasta           = Channel.fromPath(params.hla_reference_rna).collect()
 dict                    = Channel.fromPath(params.dict).collect()
 fasta                   = Channel.fromPath(params.fasta).collect()
 fasta_fai               = Channel.fromPath(params.fasta_fai).collect()
@@ -66,7 +65,7 @@ include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' 
 ========================================================================================
 */
 
-include { TRIMGALORE }              from '../modules/local/trimgalore'                      addParams( options: modules['trimgalore'] )
+include { FASTP }              from '../modules/local/fastp'                                addParams( options: modules['fastp'] )
 
 include { STAR_ALIGN }              from '../modules/local/star_align'                      addParams( options: modules['star_align'] )
 
@@ -88,11 +87,7 @@ include { RECALIBRATE } from '../subworkflows/local/recalibrate'                
     qualimap_bamqc_options:            modules['qualimap_bamqc_recalibrate']
 )
 
-include { HLATYPING } from '../subworkflows/local/hlatyping'                                addParams(
-    yara_index:                        modules['yara_index'],
-    yara_mapping:                      modules['yara_map'],
-    optitype:                          modules['optitype']
-)
+include { ARCASHLA } from '../modules/local/arcashla'                                       addParams( options: modules['arcashla'] )
 
 include { RNA_VARIANT_CALLING } from '../subworkflows/local/rna_variant_calling'            addParams(
     varscan_options:                   modules['varscan_rna'],
@@ -125,13 +120,13 @@ workflow NEOPRED_RNA {
 
     // TRIM READS WITH CUTADAPT
 
-    TRIMGALORE (
+    FASTP (
         input_sample
     )
 
-    trimmed_reads = TRIMGALORE.out.reads
+    trimmed_reads = FASTP.out.reads
 
-    ch_software_versions = ch_software_versions.mix(TRIMGALORE.out.version.first().ifEmpty(null))
+    ch_software_versions = ch_software_versions.mix(FASTP.out.version.first().ifEmpty(null))
 
     // ALIGN READS WITH STAR
 
@@ -216,14 +211,12 @@ workflow NEOPRED_RNA {
     // HLATYPING
     //
 
-    HLATYPING (
-        bam_bqsr,
-        hla_rna_fasta,
-        input_sample
+    ARCASHLA (
+        bam_bqsr
     )
 
-    hla = HLATYPING.out.hla.groupTuple(by: 0).ifEmpty([])
-    ch_software_versions = ch_software_versions.mix(HLATYPING.out.version.ifEmpty(null))
+    hla = ARCASHLA.out.hla.groupTuple(by: 0).ifEmpty([])
+    ch_software_versions = ch_software_versions.mix(ARCASHLA.out.version.ifEmpty(null))
 
     //
     // VARIANT CALLING
@@ -339,7 +332,7 @@ workflow NEOPRED_RNA {
     // ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
     // ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     // ch_multiqc_files = ch_multiqc_files.mix(GET_SOFTWARE_VERSIONS.out.yaml.collect())
-    // ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    // ch_multiqc_files = ch_multiqc_files.mix(FASTP.out.zip.collect{it[1]}.ifEmpty([]))
 
     // MULTIQC (
     //     ch_multiqc_files.collect()

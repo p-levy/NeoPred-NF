@@ -26,7 +26,7 @@ process GATK4_MARKDUPLICATES {
     def metrics  = use_metrics ? "M=${prefix}.metrics" :''
     // def bams     = bam.collect(){ x -> "INPUT=".concat(x.toString()) }.join(" ")
 
-    def markdup_java_options = (task.memory.toGiga() > 8) ? params.markdup_java_options : "\"-Xms" +  (task.memory.toGiga() / 2).trunc() + "g -Xmx" + (task.memory.toGiga() - 1) + "g\""
+    def markdup_java_options = (task.memory.giga > 8) ? params.markdup_java_options : "\"-Xms" +  (task.memory.giga / 2).trunc() + "g -Xmx" + (task.memory.giga - 1) + "g\""
     """
     gatk --java-options ${markdup_java_options} \\
         MarkDuplicates \\
