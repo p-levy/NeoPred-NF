@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `trim_galore` and `FastQC` have been replaced with `fastp`
 - `OptiType` has been removed for `neopredrna` and replaced with `arcasHLA`
+- `VEP` and `pyensembl` bumped from version 104 to 109.
+
 ### Fixed
 
 ### Dependencies
