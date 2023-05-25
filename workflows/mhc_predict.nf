@@ -73,23 +73,23 @@ workflow MHC_PREDICT {
             not_null: it[2] != null
             is_null: it[2] == null
         }.set { hlas }
-        
+
         hla_not_null = hlas.not_null.map { patient, hla_dna, hla_rna, variants ->
-            [patient, [*hla_dna, *hla_rna], variants]    
-        }.dump()
+            [patient, [*hla_dna, *hla_rna], variants]
+        }
 
         hla_null = hlas.is_null.map { patient, hla_dna, hla_rna, variants ->
-            [patient, hla_dna, variants]    
+            [patient, hla_dna, variants]
         }
 
         hla_mhc = hla_not_null.mix(hla_null)
-               
+
     } else if (hla_dna && !hla_rna) {
-        hla_mhc = hla_dna.join(variants).map { patient, hla_dna, variants -> 
+        hla_mhc = hla_dna.join(variants).map { patient, hla_dna, variants ->
         [patient, hla_dna, variants]
         }
     } else if (!hla_dna && hla_rna) {
-        hla_mhc = hla_rna.join(variants).map { patient, hla_rna, variants -> 
+        hla_mhc = hla_rna.join(variants).map { patient, hla_rna, variants ->
         [patient, hla_rna, variants]
         }
     }

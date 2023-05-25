@@ -46,7 +46,6 @@ known_indels_index      = Channel.fromPath(params.known_indels_index).collect()
 dbsnp                   = Channel.fromPath(params.dbsnp).collect()
 target_bed              = params.target_bed        ? Channel.fromPath(params.target_bed).collect()        : ch_dummy_file
 dbsnp_tbi               = Channel.fromPath(params.dbsnp_index).collect()
-hla_rna_fasta           = Channel.fromPath(params.hla_reference_rna).collect()
 dict                    = Channel.fromPath(params.dict).collect()
 fasta                   = Channel.fromPath(params.fasta).collect()
 fasta_fai               = Channel.fromPath(params.fasta_fai).collect()
@@ -88,11 +87,7 @@ include { RECALIBRATE } from '../subworkflows/local/recalibrate'                
     qualimap_bamqc_options:            modules['qualimap_bamqc_recalibrate']
 )
 
-include { HLATYPING } from '../subworkflows/local/hlatyping'                                addParams(
-    yara_index:                        modules['yara_index'],
-    yara_mapping:                      modules['yara_map'],
-    optitype:                          modules['optitype']
-)
+include { ARCAS_HLA } from '../modules/local/arcashla'                                      addParams( options: modules['arcashla'] )
 
 include { RNA_VARIANT_CALLING } from '../subworkflows/local/rna_variant_calling'            addParams(
     varscan_options:                   modules['varscan_rna'],
@@ -216,14 +211,12 @@ workflow NEOPRED_RNA {
     // HLATYPING
     //
 
-    HLATYPING (
-        bam_bqsr,
-        hla_rna_fasta,
-        input_sample
+    ARCAS_HLA (
+        bam_bqsr
     )
 
-    hla = HLATYPING.out.hla.groupTuple(by: 0).ifEmpty([])
-    ch_software_versions = ch_software_versions.mix(HLATYPING.out.version.ifEmpty(null))
+    hla = ARCAS_HLA.out.hla.groupTuple(by: 0).ifEmpty([])
+    ch_software_versions = ch_software_versions.mix(ARCAS_HLA.out.version.ifEmpty(null))
 
     //
     // VARIANT CALLING

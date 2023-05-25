@@ -30,27 +30,27 @@ process MHCFLURRY {
 
     def software    = getSoftwareName(task.process)
     hla = "--hla " + hlas.join(' ')
-    
+
     """
     mhc_predict.py \\
         $hla \\
         --variants $variants \\
         --alleles $alleles \\
         --mode $seq_mode \\
-        --cutoff $cutoff  
+        --cutoff $cutoff
 
     mhcflurry-predict-scan \\
         --alleles \$(cat allowed_alleles.txt) \\
         --results-${results} ${results_filter} \\
         --out predictions_wt.csv \\
          $options.args \\
-        protein_sequences_wt.fasta  
-    
+        protein_sequences_wt.fasta
+
     mhcflurry-predict-scan \\
         --alleles \$(cat allowed_alleles.txt) \\
         --results-${results} ${results_filter} \\
         --out predictions_mut.csv \\
          $options.args \\
-        protein_sequences_mu.fasta 
+        protein_sequences_mu.fasta
     """
 }

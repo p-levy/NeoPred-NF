@@ -60,7 +60,7 @@ gtf                     = Channel.fromPath(params.gtf).collect()
 germline_resource       = Channel.fromPath(params.germline).collect()
 germline_resource_tbi   = Channel.fromPath(params.germline_index).collect()
 vep_cache_version       = params.vep_cache_version ?: Channel.empty()
-vep_cache               = params.vep_cache ? Channel.fromPath(params.vep_cache).collect() : []            
+vep_cache               = params.vep_cache ? Channel.fromPath(params.vep_cache).collect() : []
 vep_genome              = params.vep_genome ?: Channel.empty()
 
 //
@@ -145,7 +145,7 @@ include { VEP } from '../modules/local/vep_annotate'                            
 workflow NEOPRED_DNA {
 
     ch_software_versions = Channel.empty()
-    
+
     known_sites     = dbsnp.concat(known_indels).collect()
     known_sites_tbi = dbsnp_tbi.concat(known_indels_index).collect()
 
@@ -318,7 +318,7 @@ workflow NEOPRED_DNA {
     filtered_vcf  = filtered_vcf.mix(FILTER_VARIANTS.out.strelka_indel_vcf)
     filtered_vcf  = filtered_vcf.mix(FILTER_VARIANTS.out.strelka_snv_vcf)
     filtered_vcf  = filtered_vcf.mix(FILTER_VARIANTS.out.somaticsniper_vcf)
-    
+
     filtered_vcf.groupTuple(by: 0).map { meta, paths ->
         [meta, *paths.sort( { it.getName().toString() })]
         }.set { vcf_to_merge }
