@@ -25,34 +25,20 @@ process FASTP {
     def software = getSoftwareName(task.process)
     def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
 
-    if (meta.single_end) {
-        """
-        [ ! -f  ${prefix}.fastq.gz ] && ln -s $reads ${prefix}.fastq.gz
-        fastp \\
-            --stdout \\
-            --in1 ${prefix}.fastq.gz \\
-            --out1  ${prefix}.fastp.fastq.gz \\
-            --thread $task.cpus \\
-            --json ${prefix}.fastp.json \\
-            --html ${prefix}.fastp.html \\
-            2> ${prefix}.fastp.log
-        echo \$(fastp --version 2>&1 | sed -e "s/fastp //g") >  ${software}.version.txt
-        """
-    } else {
-        """
-        [ ! -f  ${prefix}_1.fastq.gz ] && ln -s ${reads[0]} ${prefix}_1.fastq.gz
-        [ ! -f  ${prefix}_2.fastq.gz ] && ln -s ${reads[1]} ${prefix}_2.fastq.gz
-        fastp \\
-            --in1 ${prefix}_1.fastq.gz \\
-            --in2 ${prefix}_2.fastq.gz \\
-            --out1 ${prefix}_1.fastp.fastq.gz \\
-            --out2 ${prefix}_2.fastp.fastq.gz \\
-            --json ${prefix}.fastp.json \\
-            --html ${prefix}.fastp.html \\
-            --thread $task.cpus \\
-            --detect_adapter_for_pe \\
-            2> ${prefix}.fastp.log
-        echo \$(fastp --version 2>&1 | sed -e "s/fastp //g") >  ${software}.version.txt
-        """
+    """
+    [ ! -f  ${prefix}_1.fastq.gz ] && ln -s ${reads[0]} ${prefix}_1.fastq.gz
+    [ ! -f  ${prefix}_2.fastq.gz ] && ln -s ${reads[1]} ${prefix}_2.fastq.gz
+    fastp \\
+        --in1 ${prefix}_1.fastq.gz \\
+        --in2 ${prefix}_2.fastq.gz \\
+        --out1 ${prefix}_1.fastp.fastq.gz \\
+        --out2 ${prefix}_2.fastp.fastq.gz \\
+        --json ${prefix}.fastp.json \\
+        --html ${prefix}.fastp.html \\
+        --thread $task.cpus \\
+        --detect_adapter_for_pe \\
+        2> ${prefix}.fastp.log
+    echo \$(fastp --version 2>&1 | sed -e "s/fastp //g") >  ${software}.version.txt
+    """
     }
 }
