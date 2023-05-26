@@ -3,14 +3,23 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v1.0dev - [date]
+## v0.9.0
 
-Initial release of Akazhiel/NeoPred-NF, created with the [nf-core](https://nf-co.re/) template.
+### Added
 
-### `Added`
+- `Fastp` for trimming and quality control of input FASTQ.
+- `arcasHLA` added for typing and expression of HLA alleles in RNA.
 
-### `Fixed`
+### Changed
 
-### `Dependencies`
+- `trim_galore` and `FastQC` have been replaced with `fastp`
+- `OptiType` has been removed for `neopredrna` and replaced with `arcasHLA`
+- `VEP` and `pyensembl` bumped from version 104 to 109.
 
-### `Deprecated`
+### Fixed
+
+### Dependencies
+
+### Deprecated
+
+### Removed

@@ -305,5 +305,187 @@
         {
             "$ref": "#/definitions/generic_options"
         }
-    ]
+    ],
+    "properties": {
+        "refDir": {
+            "type": "string",
+            "default": "/mnt/bioinfnas/immuno/Jonatan/References"
+        },
+        "sequencing_center": {
+            "type": "string",
+            "default": null
+        },
+        "markdup_java_options": {
+            "type": "string",
+            "default": "-Xms4000m -Xmx7g"
+        },
+        "use_gatk_spark": {
+            "type": "string",
+            "default": "false"
+        },
+        "use_metrics": {
+            "type": "boolean",
+            "default": "true"
+        },
+        "target_bed": {
+            "type": "string",
+            "default": "false"
+        },
+        "ignore_soft_clipped_bases": {
+            "type": "boolean",
+            "default": "true"
+        },
+        "vep_cache": {
+            "type": "string",
+            "default": null
+        },
+        "DNA": {
+            "type": "boolean",
+            "default": null
+        },
+        "RNA": {
+            "type": "boolean",
+            "default": null
+        },
+        "dna_tumor_cov": {
+            "type": "integer",
+            "default": 10
+        },
+        "dna_tumor_depth": {
+            "type": "integer",
+            "default": 4
+        },
+        "dna_tumor_vaf": {
+            "type": "integer",
+            "default": 7
+        },
+        "dna_normal_cov": {
+            "type": "integer",
+            "default": 10
+        },
+        "dna_normal_vaf": {
+            "type": "integer",
+            "default": 100
+        },
+        "tumor_normal_ratio": {
+            "type": "integer",
+            "default": 5
+        },
+        "dna_snv_callers": {
+            "type": "integer",
+            "default": 2
+        },
+        "dna_indel_callers": {
+            "type": "integer",
+            "default": 1
+        },
+        "rna_tumor_cov": {
+            "type": "integer",
+            "default": 10
+        },
+        "rna_tumor_depth": {
+            "type": "integer",
+            "default": 5
+        },
+        "rna_tumor_vaf": {
+            "type": "integer",
+            "default": 3
+        },
+        "rna_callers": {
+            "type": "integer",
+            "default": 2
+        },
+        "results": {
+            "type": "string",
+            "default": "best"
+        },
+        "results_filter": {
+            "type": "string",
+            "default": "affinity"
+        },
+        "cutoff": {
+            "type": "integer",
+            "default": 1
+        },
+        "seq_mode": {
+            "type": "string",
+            "default": "either"
+        },
+        "star_index": {
+            "type": "string",
+            "default": null
+        },
+        "gtf": {
+            "type": "string",
+            "default": null
+        },
+        "bwa": {
+            "type": "string",
+            "default": null
+        },
+        "germline": {
+            "type": "string",
+            "default": null
+        },
+        "germline_index": {
+            "type": "string",
+            "default": null
+        },
+        "pon": {
+            "type": "string",
+            "default": null
+        },
+        "pon_index": {
+            "type": "string",
+            "default": null
+        },
+        "intervals": {
+            "type": "string",
+            "default": null
+        },
+        "vep_genome": {
+            "type": "string",
+            "default": null
+        },
+        "vep_cache_version": {
+            "type": "string",
+            "default": null
+        },
+        "known_indels": {
+            "type": "string",
+            "default": null
+        },
+        "known_indels_index": {
+            "type": "string",
+            "default": null
+        },
+        "hla_reference_dna": {
+            "type": "string",
+            "default": null
+        },
+        "hla_reference_rna": {
+            "type": "string",
+            "default": null
+        },
+        "aa_dict": {
+            "type": "string",
+            "default": null
+        },
+        "cdna_dict": {
+            "type": "string",
+            "default": null
+        },
+        "utr_dict": {
+            "type": "string",
+            "default": null
+        },
+        "pyensembl": {
+            "type": "string",
+            "default": null
+        },
+        "alleles": {
+            "type": "string",
+            "default": null
+        }
+    }
 }

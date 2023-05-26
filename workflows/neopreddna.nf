@@ -60,7 +60,7 @@ gtf                     = Channel.fromPath(params.gtf).collect()
 germline_resource       = Channel.fromPath(params.germline).collect()
 germline_resource_tbi   = Channel.fromPath(params.germline_index).collect()
 vep_cache_version       = params.vep_cache_version ?: Channel.empty()
-vep_cache               = params.vep_cache ? Channel.fromPath(params.vep_cache).collect() : []            
+vep_cache               = params.vep_cache ? Channel.fromPath(params.vep_cache).collect() : []
 vep_genome              = params.vep_genome ?: Channel.empty()
 
 //
@@ -83,9 +83,7 @@ include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' 
 
 //include { MULTIQC } from '../modules/nf-core/modules/multiqc/main' addParams( options: multiqc_options   )
 
-include { FASTQC  }                 from '../modules/local/fastqc'                          addParams( options: modules['fastqc'] )
-
-include { TRIMGALORE }              from '../modules/local/trimgalore'                      addParams( options: modules['trimgalore'] )
+include { FASTP  }                 from '../modules/local/fastp'                          addParams( options: modules['fastp'] )
 
 include { MAPPING } from '../subworkflows/local/mapping'                                    addParams(
     bwamem_options:                     modules['bwamem'],
@@ -145,7 +143,7 @@ include { VEP } from '../modules/local/vep_annotate'                            
 workflow NEOPRED_DNA {
 
     ch_software_versions = Channel.empty()
-    
+
     known_sites     = dbsnp.concat(known_indels).collect()
     known_sites_tbi = dbsnp_tbi.concat(known_indels_index).collect()
 
@@ -155,23 +153,12 @@ workflow NEOPRED_DNA {
 
     input_sample.view()
 
-    FASTQC (
+    FASTP (
         input_sample
     )
 
-    ch_software_versions = ch_software_versions.mix(FASTQC.out.version.first().ifEmpty(null))
-
-    //
-    // MODULE: Run Trimgalore
-    //
-
-    TRIMGALORE (
-        input_sample
-    )
-
-    trimmed_reads = TRIMGALORE.out.reads
-
-    ch_software_versions = ch_software_versions.mix(TRIMGALORE.out.version.ifEmpty(null))
+    trimmed_reads = FASTP.out.reads
+    ch_software_versions = ch_software_versions.mix(FASTP.out.version.first().ifEmpty(null))
 
     MAPPING (
         trimmed_reads,
@@ -318,7 +305,7 @@ workflow NEOPRED_DNA {
     filtered_vcf  = filtered_vcf.mix(FILTER_VARIANTS.out.strelka_indel_vcf)
     filtered_vcf  = filtered_vcf.mix(FILTER_VARIANTS.out.strelka_snv_vcf)
     filtered_vcf  = filtered_vcf.mix(FILTER_VARIANTS.out.somaticsniper_vcf)
-    
+
     filtered_vcf.groupTuple(by: 0).map { meta, paths ->
         [meta, *paths.sort( { it.getName().toString() })]
         }.set { vcf_to_merge }
@@ -384,7 +371,7 @@ workflow NEOPRED_DNA {
     // ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
     // ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     // ch_multiqc_files = ch_multiqc_files.mix(GET_SOFTWARE_VERSIONS.out.yaml.collect())
-    // ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    // ch_multiqc_files = ch_multiqc_files.mix(FASTP.out.zip.collect{it[1]}.ifEmpty([]))
 
     // MULTIQC (
     //     ch_multiqc_files.collect()

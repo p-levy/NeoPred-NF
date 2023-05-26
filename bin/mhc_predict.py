@@ -20,14 +20,17 @@ def main(hla, overlap_final, alleles_file, mode, cutoff):
     # TODO perform sanity check on input parameters
     
     HLA_dict = defaultdict(list)
-    for f in hla:
-        with open(f) as f:
-            next(f)
-            for line in f.readlines():
+    for hla_tsv in hla:
+        with open(hla_tsv, "r") as file:
+            next(file)
+            for line in file.readlines():
                 columns = line.split('\t')[1:7]
                 for i in range(len(columns)):
-                    key = columns[i].split("*")[0]
-                    HLA_dict[key].append(columns[i])
+                    if columns[i].split("*")[0] in ['A', 'B', 'C']:
+                        key = columns[i].split("*")[0]
+                        HLA_dict[key].append(columns[i])
+                    else:
+                        continue
 
     # Filter HLAs by occurrences
     filtered_hla = []
