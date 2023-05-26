@@ -40,5 +40,4 @@ process FASTP {
         2> ${prefix}.fastp.log
     echo \$(fastp --version 2>&1 | sed -e "s/fastp //g") >  ${software}.version.txt
     """
-    }
 }
