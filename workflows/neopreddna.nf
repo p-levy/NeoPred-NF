@@ -83,7 +83,7 @@ include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' 
 
 //include { MULTIQC } from '../modules/nf-core/modules/multiqc/main' addParams( options: multiqc_options   )
 
-include { FASTP  }                 from '../modules/local/fastp'                          addParams( options: modules['fastp'] )
+include { FASTP  }                 from '../modules/local/fastp'                            addParams( options: modules['fastp'] )
 
 include { MAPPING } from '../subworkflows/local/mapping'                                    addParams(
     bwamem_options:                     modules['bwamem'],
@@ -112,6 +112,8 @@ include { HLATYPING } from '../subworkflows/local/hlatyping'                    
     yara_mapping:                      modules['yara_map'],
     optitype:                          modules['optitype']
 )
+
+include { T1K } from '../modules/local/t1k.nf'                                              addParams( options: modules['t1k'])
 
 include { PAIR_VARIANT_CALLING } from '../subworkflows/local/somatic_variant_calling'       addParams(
     mutect2_somatic_options:           modules['mutect2_somatic'],
@@ -254,8 +256,19 @@ workflow NEOPRED_DNA {
         input_sample
     )
 
-    hla = HLATYPING.out.hla.groupTuple(by: 0).ifEmpty([])
+    hla_optitype = HLATYPING.out.hla.groupTuple(by: 0).ifEmpty([])
     ch_software_versions = ch_software_versions.mix(HLATYPING.out.version.ifEmpty(null))
+
+    T1K (
+        trimmed_reads
+    )
+
+    hla_t1k = T1K.out.hla_allele.groupTuple(by: 0).ifEmpty([])
+    ch_software_versions = ch_software_versions.mix(T1K.out.version.ifEmpty(null))
+
+    hla = hla_optitype.join(hla_t1k).map{ key, files1, files2 ->
+                                            [key, (files1 + files2)]
+     }
 
     //
     // SOMATIC VARIANT CALLING
@@ -336,11 +349,10 @@ workflow NEOPRED_DNA {
         vep_genome
     )
 
-    annotated_vcf = VEP.out.vcf.collect().flatten().collate(2).ifEmpty([])
-    annotated_vcf.map{ meta, vcf ->
-        [meta.patient, meta.tumor, vcf]
+    annotated_vcf = VEP.out.vcf.collect().flatten().collate(3).ifEmpty([])
+    annotated_vcf.map{ meta, vcf, tbi ->
+        [meta.patient, meta.tumor, vcf, tbi]
     }.groupTuple(by: 0).set{ ann_vcf }
-
     ch_software_versions = ch_software_versions.mix(VEP.out.version.ifEmpty(null))
 
     //

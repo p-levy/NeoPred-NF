@@ -79,49 +79,50 @@ workflow MERGE_RESULTS {
 
     if (vep_vcf_dna && vep_vcf_rna) {
         vcfs = vep_vcf_dna.join(vep_vcf_rna, remainder: true)
-        vcfs = vcfs.join(rna_counts, remainder: true).groupTuple(by: 0, size: 6, remainder: true)
+        vcfs = vcfs.join(rna_counts, remainder: true).groupTuple(by: 0, size: 8, remainder: true)
 
         vcfs.branch{
-            vcfs_5: it.size() == 5
-            vcfs_6: it.size() == 6
+            vcfs_7: it.size() == 7
+            vcfs_8: it.size() == 8
         }.set { vcfs }
 
-        vcfs_5 = vcfs.vcfs_5.map { patient, dna, dna_vcf, rna, rna_vcf ->
-            [patient, *dna, *dna_vcf, [], [], []]
-            }
-        
-        vcfs_6 = vcfs.vcfs_6.map { patient, dna, dna_vcf, rna, rna_vcf, rna_counts ->
-            [patient, *dna, *dna_vcf, *rna, *rna_vcf, *rna_counts]
+        vcfs_7 = vcfs.vcfs_7.map { patient, dna, dna_vcf, rna, rna_vcf ->
+            [patient, *dna, *dna_vcf, *dna_tbi, [], [], [], []]
             }
 
-        vcfs_to_merge = vcfs_5.mix(vcfs_6)
+        vcfs_8 = vcfs.vcfs_8.map { patient, dna, dna_vcf, dna_tbi, rna, rna_vcf, rna_tbi, rna_counts ->
+            [patient, *dna, *dna_vcf, *dna_tbi, *rna, *rna_vcf, *rna_tbi, *rna_counts]
+            }
+
+        vcfs_to_merge = vcfs_7.mix(vcfs_8)
     } else if (vep_vcf_dna && !vep_vcf_rna) {
-        vcfs_to_merge = vep_vcf_dna.map { patient, dna, dna_vcf -> 
-        [patient, dna, dna_vcf, [], [], []]
+        vcfs_to_merge = vep_vcf_dna.map { patient, dna, dna_vcf, dna_tbi ->
+        [patient, dna, dna_vcf, dna_tbi, [], [], [], []]
         }
+        vcfs_to_merge.view()
     } else if (!vep_vcf_dna && vep_vcf_rna) {
-        vcfs_to_merge = vep_vcf_rna.join(rna_counts).map { patient, rna, rna_vcf, rna_counts -> 
-        [patient, [], [], rna, rna_vcf, rna_counts]
+        vcfs_to_merge = vep_vcf_rna.join(rna_counts).map { patient, rna, rna_vcf, rna_counts ->
+        [patient, [], [], [], rna, rna_vcf, rna_tbi, rna_counts]
         }
     }
 
     MERGE_VARIANTS (
         vcfs_to_merge,
-        dna_tumor_cov,     
-        dna_tumor_depth,   
-        dna_tumor_vaf,     
-        dna_normal_cov,    
-        dna_normal_vaf,    
+        dna_tumor_cov,
+        dna_tumor_depth,
+        dna_tumor_vaf,
+        dna_normal_cov,
+        dna_normal_vaf,
         tumor_normal_ratio,
-        dna_snv_callers,   
-        dna_indel_callers, 
-        rna_tumor_cov,     
-        rna_tumor_depth,   
-        rna_tumor_vaf,     
+        dna_snv_callers,
+        dna_indel_callers,
+        rna_tumor_cov,
+        rna_tumor_depth,
+        rna_tumor_vaf,
         rna_callers,
         cdna_dict,
         aa_dict,
-        utr_dict    
+        utr_dict
     )
 
     emit:
@@ -129,6 +130,6 @@ workflow MERGE_RESULTS {
     overlap_final         = MERGE_VARIANTS.out.overlap_final
     overlap_discarded     = MERGE_VARIANTS.out.overlap_discarded
     overlap_rna           = MERGE_VARIANTS.out.overlap_rna
-    overlap_rna_discarded = MERGE_VARIANTS.out.overlap_rna_discarded  
+    overlap_rna_discarded = MERGE_VARIANTS.out.overlap_rna_discarded
     final_counts          = MERGE_VARIANTS.out.final_counts
 }

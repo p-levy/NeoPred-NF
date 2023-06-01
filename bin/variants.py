@@ -16,19 +16,20 @@ Record_INFO = namedtuple('INFO', 'Allele Consequence SYMBOL Gene Feature_type Fe
 
 class Variant:
     def __init__(self):
-        self.chrom = None
-        self.start = None
-        self.ref = None
-        self.alt = None
-        self.epitopes = None
-        self.callers = None
+        self.chrom       = None
+        self.start       = None
+        self.ref         = None
+        self.alt         = None
+        self.epitopes    = None
+        self.callers     = None
         self.num_callers = None
-        self.status = None
-        self.type = None
-        self.dbsnp = None
-        self.gnomad = None
-        self.cosmic = None
-        self.gene = None
+        self.status      = None
+        self.type        = None
+        self.dbsnp       = None
+        self.gnomad      = None
+        self.cosmic      = None
+        self.gene        = None
+        self.proximal    = None
 
     @property
     def key(self):
@@ -36,6 +37,21 @@ class Variant:
 
     def __str__(self):
         return '{}:{} {}>{} {} {}'.format(self.chrom, self.start, self.ref, self.alt, self.type, self.status)
+
+
+def proximal_variants(vcf, chromosome, start, end, alt, flanking_bases):
+    proximal_variants = ""
+    try:
+        entries = vcf.fetch(chromosome, start - flanking_bases, end + flanking_bases)
+    except ValueError as e:
+        return ""
+
+    for entry in entries:
+        if entry.start == start and entry.stop == end and entry.alts[0] == alt:
+            continue
+        else:
+            proximal_variants += f"{entry.chrom}:{entry.pos}-{entry.ref}>{entry.alts[0]}. "
+    return proximal_variants
 
 
 def epitopes(record, info, ens_data, cDNA_seq_dict, AA_seq_dict, three_prime_utr_dict):
@@ -195,7 +211,9 @@ def filter_variants_dna(file, normal_coverage, tumor_coverage, tumor_var_depth,
     ens_data = EnsemblRelease(int(ensembl_version))
     variants = list()
     reader = vcfpy.Reader.from_path(file)
+    proximal_vcf = vcfpy.Reader.from_path(file)
     for record in reader:
+        proximal_vars = proximal_variants(proximal_vcf, record.CHROM, record.begin, record.affected_end, record.ALT[0].value, 20)
         for info in record.INFO['CSQ']:
             record_INFO = Record_INFO(*info.split('|'))
             funcensGene = record_INFO.Consequence
@@ -358,6 +376,7 @@ def filter_variants_dna(file, normal_coverage, tumor_coverage, tumor_var_depth,
                 variant.cosmic = cosmic70
                 variant.type = 'dna'
                 variant.gene = gene
+                variant.proximal = proximal_vars
                 variants.append(variant)
 
     return variants

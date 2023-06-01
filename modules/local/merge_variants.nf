@@ -15,7 +15,7 @@ process MERGE_VARIANTS {
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'overlap_merge', meta:patient, publish_by_meta:[]) }
 
     input:
-    tuple val(patient), val(tumor_dna), path(vcfs_dna), val(tumor_rna), path(vcfs_rna), path(counts)
+    tuple val(patient), val(tumor_dna), path(vcfs_dna), path(vcfs_dna_tbi), val(tumor_rna), path(vcfs_rna), path(vcfs_rna_tbi), path(counts)
     val dna_tumor_cov
     val dna_tumor_depth
     val dna_tumor_vaf

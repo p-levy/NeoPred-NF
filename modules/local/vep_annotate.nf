@@ -21,7 +21,7 @@ process VEP {
     val(vep_genome)
 
     output:
-    tuple val(meta), path("*.ann.vcf")  , emit: vcf
+    tuple val(meta), path("*.ann.vcf.gz"), path("*.tbi")  , emit: vcf
     path "*.version.txt"                , emit: version
 
     script:
@@ -45,6 +45,8 @@ process VEP {
         --dir_cache $dir_cache \\
         --fork $task.cpus \\
         $options.args2
+
+    bgzip ${prefix}.ann.vcf && tabix -p vcf ${prefix}.ann.vcf.gz
 
     echo \$(vep --help 2>&1) | sed 's/^.*Versions:.*ensembl-vep : //;s/ .*\$//' > ${software}.version.txt
     """
