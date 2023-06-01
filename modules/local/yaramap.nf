@@ -25,25 +25,16 @@ process YARA_MAPPER {
     def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
 
     """
-    samtools view -@ ${split_cpus} -h -f 0x40 $bam > output_1.bam
-    samtools view -@ ${split_cpus} -h -f 0x80 $bam > output_2.bam
-    samtools bam2fq output_1.bam > output_1.fastq
-    samtools bam2fq output_2.bam > output_2.fastq
+    samtools collate -u -O -@ ${task.cpus} ${bam} | samtools fastq -@ ${task.cpus} -1 output_1.fastq.gz -2 output_2.fastq.gz -0 /dev/null
     yara_mapper \\
         $options.args \\
         -t ${task.cpus} \\
         -f bam \\
         ${index}/yara \\
-        output_1.fastq \\
-        output_2.fastq > output.bam
+        output_1.fastq.gz \\
+        output_2.fastq.gz > output.bam
     samtools view -@ ${split_cpus} -hF 4 -f 0x40 -b output.bam > ${prefix}_1.mapped.bam
     samtools view -@ ${split_cpus} -hF 4 -f 0x80 -b output.bam > ${prefix}_2.mapped.bam
-    
-    rm output_2.bam
-    rm output_1.bam
-    rm output_1.fastq
-    rm output_2.fastq
-    rm output.bam
 
     echo \$(yara_mapper --version) | sed "s/^.*yara_mapper version: //; s/ .*\$//" > ${software}.version.txt
     """
