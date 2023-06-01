@@ -22,13 +22,12 @@ def main(hla, overlap_final, alleles_file, mode, cutoff):
     HLA_dict = defaultdict(list)
     for hla_tsv in hla:
         with open(hla_tsv, "r") as file:
-            next(file)
             for line in file.readlines():
-                columns = line.split('\t')[1:7]
+                columns = line.split()
                 for i in range(len(columns)):
-                    if columns[i].split("*")[0] in ['A', 'B', 'C']:
-                        key = columns[i].split("*")[0]
-                        HLA_dict[key].append(columns[i])
+                    HLA = columns[i].split('-')[-1].split("*")[0]
+                    if HLA in ['A', 'B', 'C']:
+                        HLA_dict[HLA].append(columns[i].split('-')[-1])
                     else:
                         continue
 
