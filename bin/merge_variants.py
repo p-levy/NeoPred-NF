@@ -37,7 +37,6 @@ def main(dna_variants,
         sys.exit(1)
 
     # TODO add sanity check for parameters
-
     AA_seq_dict = dict()
     with open(AA_DICT, "r") as handle:
         for line in handle.readlines():
@@ -115,13 +114,13 @@ def main(dna_variants,
             counts_table.to_csv(file + '.final', sep='\t', index=False)
 
     print('Creating merged variants..')
-    header_final = 'Variant key\tDBsnp ID\tGnomad MAF\tCosmic ID\tDNA samples (passing)\tNumber of DNA samples (passing)\t' \
-                   'DNA samples (failing)\tNumber of DNA samples (failing)\t' \
-                   'RNA samples (passing)\tNumber of RNA samples (passing)\t' \
-                   'RNA samples (failing)\tNumber of RNA samples (failing)\tEffects\t' \
-                   'cDNA change\tAA change\tEpitope creation flags\tWt Epitope 25mer\t' \
-                   'Mut Epitope 25mer\tWt Epitope 41mer\tMut Epitope 41mer\tTranscripts\tDNA Callers Sample(Name:NDP;NAD;NVAF;TDP;TAD;TVAF)\t' \
-                   'RNA Callers Sample(Name:TDP;TAD;TVAF)\tGeneCount info Sample(gene;exp;mean;percentile)\n'
+    header_final = 'Variant_key\tDBsnp_ID\tGnomad_MAF\tCosmic_ID\tDNA_samples_(passing)\tNumber_of_DNA_samples_(passing)\t' \
+                   'DNA_samples_(failing)\tNumber_of_DNA_samples_(failing)\t' \
+                   'RNA_samples_(passing)\tNumber_of_RNA_samples_(passing)\t' \
+                   'RNA_samples_(failing)\tNumber_of_RNA_samples_(failing)\tEffects\t' \
+                   'cDNA_change\tAA_change\tEpitope_creation_flags\tProximal_variant\tWt_Epitope_25mer\t' \
+                   'Mut_Epitope_25mer\tWt_Epitope_41mer\tMut_Epitope_41mer\tTranscripts\tDNA_Callers_Sample(Name:NDP;NAD;NVAF;TDP;TAD;TVAF)\t' \
+                   'RNA_Callers_Sample(Name:TDP;TAD;TVAF)\tGeneCount_info_Sample(gene;exp;mean;percentile)\n'
 
     final_file = open('overlap_final.txt', 'w')
     final_file.write(header_final)
@@ -158,6 +157,7 @@ def main(dna_variants,
         gnomad = value[0][0].gnomad
         cosmic = value[0][0].cosmic
         gene = value[0][0].gene # Check that the gene is the correct one for the variant
+        proximal = value[0][0].proximal
 
         # Create a dictionary of epitopes so to keep unique ones (different mut peptide)
         epitopes_dict = defaultdict(list)
@@ -193,7 +193,7 @@ def main(dna_variants,
                                                   ';'.join(dna_name_fail), num_dna_fail,
                                                   ';'.join(rna_name_pass), num_rna_pass,
                                                   ';'.join(rna_name_fail), num_rna_fail,
-                                                  effect, epitope.dnamut, epitope.aamut, epitope.flags,
+                                                  effect, epitope.dnamut, epitope.aamut, epitope.flags, proximal,
                                                   epitope.wtseq[0], epitope.mutseq[0], epitope.wtseq[1], epitope.mutseq[1], transcripts,
                                                   dna_callers, rna_callers, ';'.join(gene_locus)])
             if num_dna_pass >= 1:
