@@ -82,11 +82,12 @@ workflow MERGE_RESULTS {
         vcfs = vcfs.join(rna_counts, remainder: true).groupTuple(by: 0, size: 8, remainder: true)
 
         vcfs.branch{
-            vcfs_7: it.size() == 7
+            vcfs_6: it.size() == 6
             vcfs_8: it.size() == 8
         }.set { vcfs }
+        vcfs.vcfs_6.view()
 
-        vcfs_7 = vcfs.vcfs_7.map { patient, dna, dna_vcf, rna, rna_vcf ->
+        vcfs_6 = vcfs.vcfs_6.map { patient, dna, dna_vcf, dna_tbi, rna, rna_vcf ->
             [patient, *dna, *dna_vcf, *dna_tbi, [], [], [], []]
             }
 
@@ -94,12 +95,11 @@ workflow MERGE_RESULTS {
             [patient, *dna, *dna_vcf, *dna_tbi, *rna, *rna_vcf, *rna_tbi, *rna_counts]
             }
 
-        vcfs_to_merge = vcfs_7.mix(vcfs_8)
+        vcfs_to_merge = vcfs_6.mix(vcfs_8)
     } else if (vep_vcf_dna && !vep_vcf_rna) {
         vcfs_to_merge = vep_vcf_dna.map { patient, dna, dna_vcf, dna_tbi ->
         [patient, dna, dna_vcf, dna_tbi, [], [], [], []]
         }
-        vcfs_to_merge.view()
     } else if (!vep_vcf_dna && vep_vcf_rna) {
         vcfs_to_merge = vep_vcf_rna.join(rna_counts).map { patient, rna, rna_vcf, rna_counts ->
         [patient, [], [], [], rna, rna_vcf, rna_tbi, rna_counts]

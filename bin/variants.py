@@ -4,6 +4,7 @@ from epitopes import create_epitope_varcode
 from collections import namedtuple
 import numpy as np
 import vcfpy
+import pysam
 from pyensembl import EnsemblRelease
 
 #  A convenience namedtuple to store the information of an epitope
@@ -211,7 +212,7 @@ def filter_variants_dna(file, normal_coverage, tumor_coverage, tumor_var_depth,
     ens_data = EnsemblRelease(int(ensembl_version))
     variants = list()
     reader = vcfpy.Reader.from_path(file)
-    proximal_vcf = vcfpy.Reader.from_path(file)
+    proximal_vcf = pysam.VariantFile(file)
     for record in reader:
         proximal_vars = proximal_variants(proximal_vcf, record.CHROM, record.begin, record.affected_end, record.ALT[0].value, 20)
         for info in record.INFO['CSQ']:

@@ -268,7 +268,7 @@ workflow NEOPRED_DNA {
 
     hla = hla_optitype.join(hla_t1k).map{ key, files1, files2 ->
                                             [key, (files1 + files2)]
-     }
+    }
 
     //
     // SOMATIC VARIANT CALLING
