@@ -300,10 +300,10 @@ workflow NEOPRED_RNA {
         vep_genome
     )
 
-    annotated_vcf = VEP.out.vcf.collect().flatten().collate(2).ifEmpty([])
-    annotated_vcf.map{ meta, vcf ->
+    annotated_vcf = VEP.out.vcf.collect().flatten().collate(3).ifEmpty([])
+    annotated_vcf.map{ meta, vcf, tbi ->
         meta.tumor = "${meta.patient}_${meta.sample}".toString()
-        [meta.patient, meta.tumor, vcf]
+        [meta.patient, meta.tumor, vcf, tbi]
     }.groupTuple(by: 0).set{ ann_vcf }
 
     ch_software_versions = ch_software_versions.mix(VEP.out.version.ifEmpty(null))
