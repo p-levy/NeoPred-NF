@@ -64,15 +64,15 @@ def main(hla, overlap_final, alleles_file, mode, cutoff):
                 added_proteins_wt = set()
                 for line in lines:
                     columns = line.strip().split('\t')
-                    pass_somatic = int(columns[header.index('Number of DNA samples (passing)')]) > 0
-                    pass_germline = int(columns[header.index('Number of RNA samples (passing)')]) > 0
+                    pass_somatic = int(columns[header.index('Number_of_DNA_samples_(passing)')]) > 0
+                    pass_germline = int(columns[header.index('Number_of_RNA_samples_(passing)')]) > 0
                     if (mode == "both" and pass_somatic and pass_germline) or (mode == "dna" and pass_somatic)\
                         or (mode == "rna" and pass_germline) or (mode == "either" and (pass_somatic or pass_germline)):
-                        protein_name = '{}_{}_{}'.format(''.join(columns[header.index('Variant key')].split()),
-                                                         columns[header.index('cDNA change')],
-                                                         columns[header.index('AA change')])
-                        protein_seq_mu = columns[header.index('Mut Epitope 25mer')].strip()
-                        protein_seq_wt = columns[header.index('Wt Epitope 25mer')].strip()
+                        protein_name = '{}_{}_{}'.format(''.join(columns[header.index('Variant_key')].split()),
+                                                         columns[header.index('cDNA_change')],
+                                                         columns[header.index('AA_change')])
+                        protein_seq_mu = columns[header.index('Mut_Epitope_25mer')].strip()
+                        protein_seq_wt = columns[header.index('Wt_Epitope_41mer')].strip()
                         # Should probably make sure that all the letters in the protein seq are alpha (isalpha())
                         if protein_seq_mu != '-' and '.' not in protein_seq_mu and protein_seq_mu not in added_proteins_mu:
                             fwrite_mu.write('>{}\n{}\n'.format(protein_name, protein_seq_mu))
