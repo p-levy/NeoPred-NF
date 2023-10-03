@@ -51,7 +51,7 @@ def proximal_variants(vcf, chromosome, start, end, alt, flanking_bases):
         if entry.start == start and entry.stop == end and entry.alts[0] == alt:
             continue
         else:
-            proximal_variants += f"{entry.chrom}:{entry.pos}-{entry.ref}>{entry.alts[0]}. "
+            proximal_variants += f" {entry.chrom}:{entry.pos}-{entry.ref}>{entry.alts[0]}. "
     return proximal_variants
 
 
@@ -372,6 +372,7 @@ def filter_variants_dna(file, normal_coverage, tumor_coverage, tumor_var_depth,
                 variant.num_callers = len(filtered)
                 variant.status = pass_snp >= num_callers or pass_indel >= num_callers_indel
                 variant.epitopes = variant_epitopes
+                variant.epitopes.flags = proximal_vars
                 variant.dbsnp = avsnp150
                 variant.gnomad = gnomad_AF
                 variant.cosmic = cosmic70

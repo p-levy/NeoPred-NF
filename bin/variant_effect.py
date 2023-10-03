@@ -11,7 +11,6 @@ three_to_one = IUPACData.protein_letters_3to1_extended
 def translate_dna(seq):
     return translate(seq, to_stop=True)
 
-
 def missense_variant(starts, ends, wt_mer, mut_mer, errors, mut_dna, mut_aa, transcript, cDNA_pos, aa_pos, cDNA_dict, AA_dict):
     if 'delins' in mut_dna:
         return errors, wt_mer, mut_mer
@@ -70,9 +69,9 @@ def frameshift_variant(ref, starts, ends, wt_mer, mut_mer, errors, mut_dna, mut_
     wt_mer = [protein_seq[x:y] for x, y in zip(start, end)]
     if 'del' in mut_dna:
         fs = len(ref)
-        mut_cDNA = cDNA_seq[:cDNA_pos - 1] + cDNA_seq[cDNA_pos + fs - 1:]
-        mut_fasta = str(translate_dna(mut_cDNA.replace(' ', '')))
-        mut_mer = [mut_fasta[x:] for x in start]
+        mut_fasta = cDNA_seq[:cDNA_pos - 1] + cDNA_seq[cDNA_pos + fs - 1:]
+        mut_protein = str(translate_dna(mut_fasta.replace(' ', '')))
+        mut_mer = [mut_protein[x:] for x in start]
     elif 'dup' in mut_dna:
         dup_pos = [None, None]
         dup_pos = list(map(int, re.findall(r'\d+', mut_dna))) if mut_dna != '' else 0
@@ -84,6 +83,11 @@ def frameshift_variant(ref, starts, ends, wt_mer, mut_mer, errors, mut_dna, mut_
         mut_fasta = cDNA_seq[:cDNA_pos] + ins_seq + cDNA_seq[cDNA_pos:]
         mut_protein = translate_dna(mut_fasta)
         mut_mer = [mut_protein[x:y] for x, y in zip(start, end)]
+    
+    cds_utr_protein = translate(mut_fasta)
+    if "*" in cds_utr_protein and cds_utr_protein[-1] != "*":
+        errors += " Translation goes beyond the 3'-UTR."
+
     return errors, wt_mer, mut_mer
 
 
