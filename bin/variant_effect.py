@@ -85,7 +85,7 @@ def frameshift_variant(ref, starts, ends, wt_mer, mut_mer, errors, mut_dna, mut_
         mut_mer = [mut_protein[x:y] for x, y in zip(start, end)]
     
     cds_utr_protein = translate(mut_fasta)
-    if "*" in cds_utr_protein and cds_utr_protein[-1] != "*":
+    if "*" not in cds_utr_protein:
         errors += " Translation goes beyond the 3'-UTR."
 
     return errors, wt_mer, mut_mer
@@ -94,11 +94,19 @@ def frameshift_variant(ref, starts, ends, wt_mer, mut_mer, errors, mut_dna, mut_
 def stoplost_variant(starts, ends, wt_mer, mut_mer, errors, mut_dna, mut_aa, transcript, cDNA_pos, aa_pos, cDNA_dict, AA_dict, three_prime_utr_dict):
     CDS_seq = cDNA_dict[transcript]
     protein_seq = AA_dict[transcript]
+    re_finds = re.search(r"\d+(.*)ext", mut_aa)
+    var_AA = three_to_one[re_finds.group(1)]
     try:
-        utr = three_prime_utr_dict[transcript]
+        utr_seq = three_prime_utr_dict[transcript]
     except KeyError:
-        utr = ''
+        utr_seq = ''
     end = [aa_pos + x if (aa_pos + x) < len(protein_seq) else None for x in ends]
     start = [aa_pos - x for x in starts]
-    cDNA_seq = CDS_seq + utr
-    pass
+    if any(ele < 0 for ele in start):
+        errors += ' Start of sequence is shorter than 12aa from mutation'
+        start = [0 if x < 0 else x for x in start]
+    wt_mer = [protein_seq[x:y] for x, y in zip(start, end)]
+    utr_protein = translate_dna(utr_seq)
+    mut_protein =  protein_seq + var_AA + utr_protein
+    mut_mer = [mut_protein[x:y] for x, y in zip(start, end)]
+    return errors, wt_mer, mut_mer
