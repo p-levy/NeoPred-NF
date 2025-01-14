@@ -13,7 +13,7 @@ def translate_dna(seq):
 
 
 def missense_variant(starts, ends, wt_mer, mut_mer, errors, mut_dna, mut_aa, transcript, cDNA_pos, aa_pos, cDNA_dict, AA_dict):
-    if 'delins' in mut_dna:
+    if 'delins' in mut_dna or 'delins' in mut_aa:
         return errors, wt_mer, mut_mer
     ref_AA, var_AA = [three_to_one[aa] for aa in re.split(r'\d+', mut_aa.lstrip('p.')) if len(aa[1])]
     protein_seq = AA_dict[transcript]
