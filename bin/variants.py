@@ -51,7 +51,7 @@ def proximal_variants(vcf, chromosome, start, end, alt, flanking_bases):
         if entry.start == start and entry.stop == end and entry.alts[0] == alt:
             continue
         else:
-            proximal_variants += f"{entry.chrom}:{entry.pos}-{entry.ref}>{entry.alts[0]}. "
+            proximal_variants += f" {entry.chrom}:{entry.pos}-{entry.ref}>{entry.alts[0]}. "
     return proximal_variants
 
 
@@ -129,11 +129,12 @@ def filter_variants_rna(file, tumor_coverage, tumor_var_depth,
     ens_data = EnsemblRelease(int(ensembl_version))
     variants = list()
     reader = vcfpy.Reader.from_path(file)
+    csq_accepted = ['missense', 'frame', 'stop_lost']
     for record in reader:
         for info in record.INFO['CSQ']:
             record_INFO = Record_INFO(*info.split('|'))
             funcensGene = record_INFO.Consequence
-            has_func_ens = 'missense' in funcensGene or 'frame' in funcensGene or 'stop_lost' in funcensGene
+            has_func_ens = any(csq in funcensGene for csq in csq_accepted)
             avsnp150 = record_INFO.Existing_variation.split('&')[0] if 'rs' in record_INFO.Existing_variation else 'NA'
             gnomad_AF = record_INFO.gnomAD_AF if record_INFO.gnomAD_AF != '' else 'NA'
             cosm_count = record_INFO.Existing_variation.count('COSV')
@@ -213,12 +214,13 @@ def filter_variants_dna(file, normal_coverage, tumor_coverage, tumor_var_depth,
     variants = list()
     reader = vcfpy.Reader.from_path(file)
     proximal_vcf = pysam.VariantFile(file)
+    csq_accepted = ['missense', 'frame', 'stop_lost']
     for record in reader:
         proximal_vars = proximal_variants(proximal_vcf, record.CHROM, record.begin, record.affected_end, record.ALT[0].value, 20)
         for info in record.INFO['CSQ']:
             record_INFO = Record_INFO(*info.split('|'))
             funcensGene = record_INFO.Consequence
-            has_func_ens = 'missense' in funcensGene or 'frame' in funcensGene
+            has_func_ens = any(csq in funcensGene for csq in csq_accepted)
             avsnp150 = record_INFO.Existing_variation.split('&')[0] if 'rs' in record_INFO.Existing_variation else 'NA'
             gnomad_AF = record_INFO.gnomAD_AF if record_INFO.gnomAD_AF != '' else 'NA'
             cosm_count = record_INFO.Existing_variation.count('COSV')
@@ -371,7 +373,7 @@ def filter_variants_dna(file, normal_coverage, tumor_coverage, tumor_var_depth,
                 variant.callers = '|'.join(['{}:{}'.format(key, value) for key, value in filtered.items()])
                 variant.num_callers = len(filtered)
                 variant.status = pass_snp >= num_callers or pass_indel >= num_callers_indel
-                variant.epitopes = variant_epitopes
+                variant.epitopes = [variant_epitopes[0]._replace(flags = variant_epitopes[0].flags + proximal_vars)]
                 variant.dbsnp = avsnp150
                 variant.gnomad = gnomad_AF
                 variant.cosmic = cosmic70

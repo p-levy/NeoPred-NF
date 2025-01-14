@@ -25,7 +25,7 @@ process YARA_MAPPER {
     def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
 
     """
-    samtools collate -u -O -@ ${task.cpus} ${bam} | samtools fastq -@ ${task.cpus} -1 output_1.fastq.gz -2 output_2.fastq.gz -0 /dev/null
+    samtools collate -u -O -@ ${task.cpus} ${bam} -T ${bam}_prefix | samtools fastq -@ ${task.cpus} -1 output_1.fastq.gz -2 output_2.fastq.gz -0 /dev/null
     yara_mapper \\
         $options.args \\
         -t ${task.cpus} \\

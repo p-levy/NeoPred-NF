@@ -11,7 +11,6 @@ three_to_one = IUPACData.protein_letters_3to1_extended
 def translate_dna(seq):
     return translate(seq, to_stop=True)
 
-
 def missense_variant(starts, ends, wt_mer, mut_mer, errors, mut_dna, mut_aa, transcript, cDNA_pos, aa_pos, cDNA_dict, AA_dict):
     if 'delins' in mut_dna or 'delins' in mut_aa:
         return errors, wt_mer, mut_mer
@@ -70,9 +69,9 @@ def frameshift_variant(ref, starts, ends, wt_mer, mut_mer, errors, mut_dna, mut_
     wt_mer = [protein_seq[x:y] for x, y in zip(start, end)]
     if 'del' in mut_dna:
         fs = len(ref)
-        mut_cDNA = cDNA_seq[:cDNA_pos - 1] + cDNA_seq[cDNA_pos + fs - 1:]
-        mut_fasta = str(translate_dna(mut_cDNA.replace(' ', '')))
-        mut_mer = [mut_fasta[x:] for x in start]
+        mut_fasta = cDNA_seq[:cDNA_pos - 1] + cDNA_seq[cDNA_pos + fs - 1:]
+        mut_protein = str(translate_dna(mut_fasta.replace(' ', '')))
+        mut_mer = [mut_protein[x:] for x in start]
     elif 'dup' in mut_dna:
         dup_pos = [None, None]
         dup_pos = list(map(int, re.findall(r'\d+', mut_dna))) if mut_dna != '' else 0
@@ -84,17 +83,30 @@ def frameshift_variant(ref, starts, ends, wt_mer, mut_mer, errors, mut_dna, mut_
         mut_fasta = cDNA_seq[:cDNA_pos] + ins_seq + cDNA_seq[cDNA_pos:]
         mut_protein = translate_dna(mut_fasta)
         mut_mer = [mut_protein[x:y] for x, y in zip(start, end)]
+    
+    cds_utr_protein = translate(mut_fasta)
+    if "*" not in cds_utr_protein:
+        errors += " Translation goes beyond the 3'-UTR."
+
     return errors, wt_mer, mut_mer
 
 
 def stoplost_variant(starts, ends, wt_mer, mut_mer, errors, mut_dna, mut_aa, transcript, cDNA_pos, aa_pos, cDNA_dict, AA_dict, three_prime_utr_dict):
     CDS_seq = cDNA_dict[transcript]
     protein_seq = AA_dict[transcript]
+    re_finds = re.search(r"\d+(.*)ext", mut_aa)
+    var_AA = three_to_one[re_finds.group(1)]
     try:
-        utr = three_prime_utr_dict[transcript]
+        utr_seq = three_prime_utr_dict[transcript]
     except KeyError:
-        utr = ''
+        utr_seq = ''
     end = [aa_pos + x if (aa_pos + x) < len(protein_seq) else None for x in ends]
     start = [aa_pos - x for x in starts]
-    cDNA_seq = CDS_seq + utr
-    pass
+    if any(ele < 0 for ele in start):
+        errors += ' Start of sequence is shorter than 12aa from mutation'
+        start = [0 if x < 0 else x for x in start]
+    wt_mer = [protein_seq[x:y] for x, y in zip(start, end)]
+    utr_protein = translate_dna(utr_seq)
+    mut_protein =  protein_seq + var_AA + utr_protein
+    mut_mer = [mut_protein[x:y] for x, y in zip(start, end)]
+    return errors, wt_mer, mut_mer

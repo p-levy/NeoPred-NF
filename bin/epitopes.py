@@ -19,11 +19,10 @@ def create_epitope_varcode(chrm, start, ref, alt, db, mut_dna, mut_aa, transcrip
         errors += ' Could not infer the effect.'
     else:
         # Retrieve effect type
-        protein_mut = effect.short_description
+        protein_mut = effect.short_description 
         if protein_mut is None:
             errors += ' Could not retrieve AA mutation.'
         elif not protein_mut.startswith('p.'):
-            errors += ' Computed with dictionary method.'
             errors += ' Invalid mutation {}.'.format(protein_mut)
             aa_pos = int(re.findall(r'\d+', mut_aa)[0]) if mut_aa != '' else 0
             cDNA_pos = int(re.findall(r'\d+', mut_dna)[0]) if mut_dna != '' else 0
@@ -63,7 +62,6 @@ def create_epitope_varcode(chrm, start, ref, alt, db, mut_dna, mut_aa, transcrip
                 if effect.mutant_protein_sequence is None or effect.original_protein_sequence is None:
                     errors += ' Could not retrieve protein sequence.'
                 else:
-                    errors += ' Computed with varcode method.'
                     # Type of effect
                     effect_type = type(effect).__name__
                     if 'StopLoss' in effect_type:
