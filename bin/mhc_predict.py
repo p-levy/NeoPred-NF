@@ -74,11 +74,11 @@ def main(hla, overlap_final, alleles_file, mode, cutoff):
                         protein_seq_mu = columns[header.index('Mut_Epitope_25mer')].strip()
                         protein_seq_wt = columns[header.index('Wt_Epitope_41mer')].strip()
                         # Should probably make sure that all the letters in the protein seq are alpha (isalpha())
-                        if protein_seq_mu != '-' and '.' not in protein_seq_mu and protein_seq_mu not in added_proteins_mu:
+                        if protein_seq_mu != '-' and '.' not in protein_seq_mu and 'X' not in protein_seq_mu and '*' not in protein_seq_mu and protein_seq_mu not in added_proteins_mu:
                             fwrite_mu.write('>{}\n{}\n'.format(protein_name, protein_seq_mu))
                             added_proteins_mu.add(protein_seq_mu)
                         # Should probably make sure that all the letters in the protein seq are alpha (isalpha())
-                        if protein_seq_wt != '-' and '.' not in protein_seq_wt and protein_seq_wt not in added_proteins_wt:
+                        if protein_seq_wt != '-' and '.' not in protein_seq_wt and 'X' not in protein_seq_wt and '*' not in protein_seq_wt and protein_seq_wt not in added_proteins_wt:
                             fwrite_wt.write('>{}\n{}\n'.format(protein_name, protein_seq_wt))
                             added_proteins_wt.add(protein_seq_wt)
                 del added_proteins_mu
