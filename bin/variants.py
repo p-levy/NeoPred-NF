@@ -373,7 +373,10 @@ def filter_variants_dna(file, normal_coverage, tumor_coverage, tumor_var_depth,
                 variant.callers = '|'.join(['{}:{}'.format(key, value) for key, value in filtered.items()])
                 variant.num_callers = len(filtered)
                 variant.status = pass_snp >= num_callers or pass_indel >= num_callers_indel
-                variant.epitopes = [variant_epitopes[0]._replace(flags = variant_epitopes[0].flags + proximal_vars)]
+                if variant_epitopes:
+                    variant.epitopes = [variant_epitopes[0]._replace(flags = variant_epitopes[0].flags + proximal_vars)]
+                else:
+                    variant.epitopes = []
                 variant.dbsnp = avsnp150
                 variant.gnomad = gnomad_AF
                 variant.cosmic = cosmic70
